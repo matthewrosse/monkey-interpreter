@@ -1,6 +1,10 @@
 package lexer
 
-import "github.com/matthewrosse/monkey-interpreter/token"
+import (
+	"strings"
+
+	"github.com/matthewrosse/monkey-interpreter/token"
+)
 
 /*
 Since lexer.ch is a byte, the lexer only supports ASCII characters.
@@ -65,8 +69,12 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Type = token.LookupIdentifier(tok.Literal)
 			return tok
 		} else if isDigit(l.ch) {
-			tok.Type = token.INT
 			tok.Literal = l.readNumber()
+			if strings.Contains(tok.Literal, ".") {
+				tok.Type = token.FLOAT
+			} else {
+				tok.Type = token.INT
+			}
 			return tok
 		} else {
 			tok = token.New(token.ILLEGAL, l.ch)
@@ -103,7 +111,7 @@ func isDigit(ch byte) bool {
 
 func (l *Lexer) readNumber() string {
 	position := l.position
-	for isDigit(l.ch) {
+	for isDigit(l.ch) || l.ch == '.' {
 		l.readChar()
 	}
 
